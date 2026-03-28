@@ -1,0 +1,56 @@
+# QuizGuard Render Blueprint
+# Auto-deploy to Render with this file
+
+services:
+  # 1. PostgreSQL Database
+  - name: quizguard-db
+    type: psql
+    version: "16"
+    plan: free  # or starter for production ($7/month)
+    name: quizguard-db
+
+  # 2. Backend API Service
+  - name: quizguard-api
+    type: web
+    region: oregon
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npx prisma db push && node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3001"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quizguard-db
+          property: connectionString
+      - key: CLERK_SECRET_KEY
+        sync: false  # Set in Render Dashboard
+      - key: ALLOWED_ORIGINS
+        value: https://quizguard.onrender.com
+    dockerfilePath: server/Dockerfile
+    dockerContext: server
+
+  # 3. Frontend Web Service
+  - name: quizguard-web
+    type: web
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: nginx -g 'daemon off;'
+    envVars:
+      - key: VITE_API_URL
+        value: /api  # Nginx proxies to api service
+      - key: VITE_CLERK_PUBLISHABLE_KEY
+        sync: false  # Set in Render Dashboard
+      - key: BACKEND_URL
+        value: http://quizguard-api:3001
+      - key: VITE_BACKEND_URL
+        value: /api
+    dockerfilePath: quiz-client/Dockerfile
+    dockerContext: quiz-client
+    # Only one free web service allowed - so disable port if needed
+    # For free tier, combine both into single service or use API only
+
+# Note: Only 1 free web service on Render.
+# For free tier, you'll need to choose: backend OR frontend,
+# Or upgrade to starter plan ($7/month) for both services.

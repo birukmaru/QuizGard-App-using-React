@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Environment
+.env
+.env.*
+.env.example
+
+# Dependencies
+node_modules
+
+# Build output (rebuilt in Docker)
+dist
+
+# IDE
+.idea
+.vscode
+*.swp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md

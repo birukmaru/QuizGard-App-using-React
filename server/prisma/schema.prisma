@@ -1,0 +1,134 @@
+// QuizGuard Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model - synced with Clerk authentication
+model User {
+  id          String   @id @default(cuid())
+  clerkId     String   @unique // Clerk user ID
+  email       String?
+  username    String?
+  role        Role     @default(USER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quizAttempts QuizAttempt[]
+  bookmarks    Bookmark[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Category for organizing quizzes
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  icon        String?  // Emoji or icon name
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  quizzes     Quiz[]
+
+  @@map("categories")
+}
+
+// Quiz model
+model Quiz {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  categoryId  String?
+  timer       Int?        // Time limit in seconds
+  difficulty  Difficulty  @default(MEDIUM)
+  isPublished Boolean     @default(false)
+  createdBy   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  questions   Question[]
+  attempts    QuizAttempt[]
+
+  @@map("quizzes")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+// Question model
+model Question {
+  id        String   @id @default(cuid())
+  quizId    String
+  text      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quiz           Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answerOptions  AnswerOption[]
+  bookmarks      Bookmark[]
+
+  @@map("questions")
+}
+
+// Answer options for questions
+model AnswerOption {
+  id         String  @id @default(cuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("answer_options")
+}
+
+// Quiz attempt/result tracking
+model QuizAttempt {
+  id             String    @id @default(cuid())
+  userId         String
+  quizId         String
+  score          Int       @default(0)
+  totalQuestions Int
+  timeSpent      Int?      // Time in seconds
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz           Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_attempts")
+}
+
+// User bookmarks for questions
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  questionId String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("bookmarks")
+}

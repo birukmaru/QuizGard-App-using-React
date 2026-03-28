@@ -1,0 +1,27 @@
+{
+  "name": "quizguard-server",
+  "version": "1.0.0",
+  "description": "QuizGuard API Server",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@clerk/clerk-sdk-node": "^5.0.0",
+    "@prisma/client": "^5.10.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "express-validator": "^7.0.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.10.0"
+  }
+}

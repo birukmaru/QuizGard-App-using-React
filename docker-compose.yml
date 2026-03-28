@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  quizguard-db:
+    image: postgres:16-alpine
+    container_name: quizguard-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-quizguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizguard_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-quizguard}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-quizguard} -d ${POSTGRES_DB:-quizguard}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - quizguard-network
+
+  # Backend API
+  quizguard-api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: quizguard-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-quizguard}:${POSTGRES_PASSWORD:-quizguard_secure_password}@quizguard-db:5432/${POSTGRES_DB:-quizguard}
+      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
+    ports:
+      - "3001:3001"
+    depends_on:
+      quizguard-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - quizguard-network
+
+  # Frontend Web App
+  quizguard-web:
+    build:
+      context: ./quiz-client
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+        VITE_CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY}
+        BACKEND_URL: http://quizguard-api:3001
+    container_name: quizguard-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001/api}
+      BACKEND_URL: http://quizguard-api:3001
+    depends_on:
+      quizguard-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - quizguard-network
+
+networks:
+  quizguard-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

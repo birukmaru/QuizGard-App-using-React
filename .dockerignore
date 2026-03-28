@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.yml
+Dockerfile*
+.dockerignore
+
+# Documentation
+*.md
+!README.md
+
+# Node (installed via npm ci in Docker)
+node_modules
+
+# OS
+.DS_Store
+Thumbs.db
