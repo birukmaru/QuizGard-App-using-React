@@ -6,17 +6,15 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy server files
-COPY server/package*.json server/prisma ./server/
-WORKDIR /app/server
+# Copy server package files
+COPY server/package*.json ./
+COPY server/prisma ./prisma/
 
-# Install dependencies
+# Install dependencies and generate Prisma
 RUN npm ci
-
-# Generate Prisma client
 RUN npx prisma generate
 
-# Copy source
+# Copy server source
 COPY server/src ./src
 
 # Production stage
@@ -27,11 +25,11 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
 # Copy from builder
-COPY --from=builder /app/server/node_modules ./node_modules
-COPY --from=builder /app/server/prisma ./prisma
-COPY --from=builder /app/server/src ./src
-COPY --from=builder /app/server/package.json ./package.json
-COPY --from=builder /app/server/package-lock.json ./package-lock.json
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/src ./src
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/package-lock.json ./package-lock.json
 
 ENV NODE_ENV=production
 ENV PORT=3001
