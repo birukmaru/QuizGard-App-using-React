@@ -10,11 +10,15 @@ WORKDIR /app
 COPY server/package*.json ./
 COPY server/prisma ./prisma/
 
-# Install all dependencies including prisma as devDependency
+# Install all dependencies including prisma
 RUN npm ci --include=dev
 
-# Generate Prisma client (needs to be done as root)
+# Generate Prisma client
 RUN npx prisma generate
+
+# Push schema to database (only runs during build, not on container start)
+# Note: This uses DATABASE_URL from environment variable set by Render
+RUN npx prisma db push --skip-generate
 
 # Copy server source
 COPY server/src ./src
@@ -30,7 +34,7 @@ RUN apk add --no-cache openssl
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
-# Copy from builder (read-only is fine)
+# Copy from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
@@ -47,6 +51,4 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
-# Don't run prisma db push on every deploy - just start the server
-# Database should already be migrated
 CMD ["node", "src/index.js"]
