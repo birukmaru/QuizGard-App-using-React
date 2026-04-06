@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, CardContent, Badge, Spinner } from '@/components/ui';
-import { Footer } from '@/components/layout';
+import { Sidebar, SidebarProvider, useSidebar } from '@/components/layout';
 import { useAuth } from '@/hooks';
 import { quizzesApi, categoriesApi } from '@/lib/api';
 import { cn, formatNumber } from '@/lib/utils';
@@ -20,23 +20,25 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-const Home = () => {
+const HomeContent = ({ hasSidebar = false }) => {
   const { isSignedIn } = useAuth();
   const [featuredQuizzes, setFeaturedQuizzes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { collapsed } = hasSidebar ? useSidebar() : { collapsed: false };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [quizzesData, categoriesData] = await Promise.all([
-          quizzesApi.getFeatured().catch(() => []),
-          categoriesApi.getAll().catch(() => []),
-        ]);
-        setFeaturedQuizzes(quizzesData.slice(0, 6));
-        setCategories(categoriesData.slice(0, 8));
+        const quizzesData = await quizzesApi.getFeatured().catch(() => []);
+        const categoriesData = await categoriesApi.getAll().catch(() => []);
+        // Ensure we always have arrays
+        setFeaturedQuizzes(Array.isArray(quizzesData) ? quizzesData.slice(0, 6) : []);
+        setCategories(Array.isArray(categoriesData) ? categoriesData.slice(0, 8) : []);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        setFeaturedQuizzes([]);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -386,8 +388,32 @@ const Home = () => {
           </div>
         </div>
       </section>
+    </div>
+  );
+};
 
-      <Footer />
+const Home = () => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return (
+      <SidebarProvider>
+        <HomeWithSidebar />
+      </SidebarProvider>
+    );
+  }
+
+  return <HomeContent />;
+};
+
+const HomeWithSidebar = () => {
+  const { collapsed } = useSidebar();
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <HomeContent hasSidebar />
+      </div>
     </div>
   );
 };

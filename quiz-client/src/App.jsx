@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route, Outlet } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/clerk-react';
 
 // Layouts
 import { Navbar, Footer } from './components/layout';
@@ -17,6 +16,7 @@ import {
   QuizResult,
   History,
   Leaderboard,
+  Settings,
   AdminDashboard,
   CategoryManager,
   QuizManager,
@@ -52,8 +52,7 @@ function AdminLayout({ children }) {
 
 function App() {
   return (
-    <ClerkProvider>
-      <AuthProvider>
+    <AuthProvider>
         <Routes>
           {/* Public Routes with Layout */}
           <Route
@@ -95,23 +94,20 @@ function App() {
             }
           />
 
-          {/* Protected Routes */}
+          {/* Protected Routes with Layout */}
           <Route
-            path="/dashboard"
             element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
+              <AppLayout>
+                <PrivateRoute>
+                  <Outlet />
+                </PrivateRoute>
+              </AppLayout>
             }
-          />
-          <Route
-            path="/history"
-            element={
-              <PrivateRoute>
-                <History />
-              </PrivateRoute>
-            }
-          />
+          >
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
 
           {/* Admin Routes */}
           <Route
@@ -169,7 +165,6 @@ function App() {
           />
         </Routes>
       </AuthProvider>
-    </ClerkProvider>
   );
 }
 

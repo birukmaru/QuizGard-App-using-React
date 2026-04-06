@@ -15,8 +15,10 @@ import {
   Calendar,
 } from 'lucide-react';
 
-const HistoryContent = () => {
-  const { collapsed } = useSidebar();
+const HistoryContent = ({ hasSidebar = false }) => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const sidebarState = hasSidebar ? useSidebar() : { collapsed: false };
+  const { collapsed } = sidebarState;
   const navigate = useNavigate();
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +30,10 @@ const HistoryContent = () => {
       try {
         setLoading(true);
         const data = await attemptsApi.getHistory({ sort: sortBy });
-        setAttempts(data);
+        setAttempts(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch history:', error);
+        setAttempts([]);
       } finally {
         setLoading(false);
       }
@@ -69,10 +72,8 @@ const HistoryContent = () => {
   ];
 
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className={cn('flex-1 p-6 transition-all duration-300', collapsed ? 'ml-0' : '')}>
-        <div className="mx-auto max-w-5xl">
+    <div className="flex-1 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="mx-auto max-w-5xl">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -237,16 +238,25 @@ const HistoryContent = () => {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
   );
 };
 
-const History = () => {
+const History = () => (
+  <SidebarProvider>
+    <HistoryWithSidebar />
+  </SidebarProvider>
+);
+
+const HistoryWithSidebar = () => {
+  const { collapsed } = useSidebar();
   return (
-    <SidebarProvider>
-      <HistoryContent />
-    </SidebarProvider>
+    <div className="flex">
+      <Sidebar />
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <HistoryContent hasSidebar />
+      </div>
+    </div>
   );
 };
 

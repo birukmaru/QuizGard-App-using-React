@@ -9,6 +9,7 @@ export { default as QuizPlay } from './QuizPlay';
 export { default as QuizResult } from './QuizResult';
 export { default as History } from './History';
 export { default as Leaderboard } from './Leaderboard';
+export { default as Settings } from './Settings';
 
 // Admin pages
 export { default as AdminDashboard } from './admin/AdminDashboard';

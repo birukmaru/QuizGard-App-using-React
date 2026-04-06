@@ -21,7 +21,7 @@ function Navbar() {
                 <a href="">About Us</a>
               </li>
             </ul>
-            <button className="font-medium px-5 py-1 bg-primary">Login</button>
+            <button className="font-medium px-5 py-1 bg-primary-500">Login</button>
           </div>
         </nav>
       </header>

@@ -1,12 +1,13 @@
 import React, { forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 
-const Card = forwardRef(({ className, ...props }, ref) => (
+const Card = forwardRef(({ className, hoverable = false, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
       'rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200',
       'dark:border-gray-700 dark:bg-gray-800',
+      hoverable && 'hover:shadow-md hover:-translate-y-0.5 cursor-pointer',
       className
     )}
     {...props}
@@ -46,7 +47,7 @@ const CardDescription = forwardRef(({ className, ...props }, ref) => (
 CardDescription.displayName = 'CardDescription';
 
 const CardContent = forwardRef(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />
+  <div ref={ref} className={cn('p-6', className)} {...props} />
 ));
 CardContent.displayName = 'CardContent';
 

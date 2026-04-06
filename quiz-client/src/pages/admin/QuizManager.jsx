@@ -61,10 +61,12 @@ const QuizManager = () => {
         quizzesApi.getAll({ sort: 'recent' }),
         categoriesApi.getAll(),
       ]);
-      setQuizzes(quizzesData);
-      setCategories(categoriesData);
+      setQuizzes(Array.isArray(quizzesData) ? quizzesData : []);
+      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      setQuizzes([]);
+      setCategories([]);
     } finally {
       setLoading(false);
     }

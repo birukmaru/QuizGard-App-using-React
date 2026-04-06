@@ -9,12 +9,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Shield,
   BarChart3,
-  Users,
   FolderPlus,
   HelpCircle,
-  LogOut,
 } from 'lucide-react';
 import { useAuthContext } from '@/context/AuthContext';
 
@@ -61,49 +58,37 @@ export function Sidebar({ className }) {
     { name: 'Overview', href: '/admin', icon: BarChart3 },
     { name: 'Categories', href: '/admin/categories', icon: FolderPlus },
     { name: 'Quizzes', href: '/admin/quizzes', icon: BookOpen },
-    { name: 'Users', href: '/admin/users', icon: Users },
   ];
 
   return (
     <aside
       className={cn(
-        'sticky top-16 flex h-[calc(100vh-4rem)] flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900',
+        'fixed left-0 top-16 z-30 flex h-[calc(100vh-4rem)] flex-col border-r border-gray-200 bg-white transition-all duration-300 dark:border-gray-800 dark:bg-gray-900',
         collapsed ? 'w-16' : 'w-64',
+        'max-md:-translate-x-full md:translate-x-0',
         className
       )}
     >
-      {/* Collapse Toggle */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className={cn(
-          'absolute -right-3 top-6 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition-colors hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800',
-          collapsed ? 'rotate-180' : ''
-        )}
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      >
-        <ChevronLeft className="h-4 w-4 text-gray-500" />
-      </button>
-
       {/* Main Navigation */}
-      <nav className="flex-1 space-y-1 p-3">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         <p
           className={cn(
             'mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400',
-            collapsed && 'px-2 text-center'
+            collapsed && 'hidden'
           )}
         >
-          {collapsed ? '---' : 'Menu'}
+          Menu
         </p>
         {mainNavItems.map((item) => (
           <Link
             key={item.name}
             to={item.href}
             className={cn(
-              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+              'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
               isActive(item.href)
-                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white',
-              collapsed && 'justify-center px-2'
+              collapsed && 'justify-center px-0'
             )}
             title={collapsed ? item.name : undefined}
           >
@@ -119,21 +104,21 @@ export function Sidebar({ className }) {
             <p
               className={cn(
                 'mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400',
-                collapsed && 'px-2 text-center'
+                collapsed && 'hidden'
               )}
             >
-              {collapsed ? '---' : 'Admin'}
+              Admin
             </p>
             {adminNavItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                   isActive(item.href)
-                    ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                    ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white',
-                  collapsed && 'justify-center px-2'
+                  collapsed && 'justify-center px-0'
                 )}
                 title={collapsed ? item.name : undefined}
               >
@@ -153,11 +138,11 @@ export function Sidebar({ className }) {
               key={item.name}
               to={item.href}
               className={cn(
-                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                 isActive(item.href)
-                  ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                  ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white',
-                collapsed && 'justify-center px-2'
+                collapsed && 'justify-center px-0'
               )}
               title={collapsed ? item.name : undefined}
             >
@@ -165,6 +150,26 @@ export function Sidebar({ className }) {
               {!collapsed && <span>{item.name}</span>}
             </Link>
           ))}
+
+          {/* Collapse Toggle */}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className={cn(
+              'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
+              'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white',
+              collapsed && 'justify-center px-0'
+            )}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-5 w-5 transition-transform duration-200 group-hover:translate-x-0.5" />
+            ) : (
+              <>
+                <ChevronLeft className="h-5 w-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+                <span>Collapse</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
     </aside>

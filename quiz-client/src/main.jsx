@@ -8,12 +8,12 @@ import { ThemeProvider } from './context/ThemeContext.jsx';
 import './index.css';
 
 // Clerk publishable key - set in .env file as VITE_CLERK_PUBLISHABLE_KEY
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_c21hc2hpbmctbW9sZS05MC5jbGVyay5hY2NvdW50cy5kZXYk';
 
-if (!clerkPubKey) {
-  console.warn(
-    'Clerk publishable key not found. Set VITE_CLERK_PUBLISHABLE_KEY in your .env file.'
-  );
+// Debug: log the key status
+console.log('Clerk Key:', clerkPubKey ? 'Loaded' : 'Missing');
+if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  console.warn('VITE_CLERK_PUBLISHABLE_KEY not found in env, using fallback');
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

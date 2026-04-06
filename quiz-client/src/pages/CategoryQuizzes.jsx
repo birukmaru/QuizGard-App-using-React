@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, Button, Badge, Spinner, Input, Select } from '@/components/ui';
-import { Footer } from '@/components/layout';
 import { categoriesApi, quizzesApi } from '@/lib/api';
 import { cn, formatDate } from '@/lib/utils';
 import {
@@ -31,14 +30,13 @@ const CategoryQuizzes = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [categoryData, quizzesData] = await Promise.all([
-          categoriesApi.getById(categoryId).catch(() => null),
-          quizzesApi.getByCategory(categoryId, { sort: sortBy }).catch(() => []),
-        ]);
+        const categoryData = await categoriesApi.getById(categoryId).catch(() => null);
+        const quizzesData = await quizzesApi.getByCategory(categoryId, { sort: sortBy }).catch(() => []);
         setCategory(categoryData);
-        setQuizzes(quizzesData);
+        setQuizzes(Array.isArray(quizzesData) ? quizzesData : []);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        setQuizzes([]);
       } finally {
         setLoading(false);
       }
@@ -160,8 +158,6 @@ const CategoryQuizzes = () => {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };

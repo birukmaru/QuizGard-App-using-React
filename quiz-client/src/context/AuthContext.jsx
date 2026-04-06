@@ -28,7 +28,10 @@ export function AuthProvider({ children }) {
       setUserProfile(profile);
       return profile;
     } catch (err) {
-      console.error('Failed to fetch user profile:', err);
+      // 401 is expected when not logged in - don't log as error
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch user profile:', err);
+      }
       setError(err.message);
       return null;
     } finally {
@@ -46,7 +49,10 @@ export function AuthProvider({ children }) {
       setUserStats(stats);
       return stats;
     } catch (err) {
-      console.error('Failed to fetch user stats:', err);
+      // 401 is expected when not logged in - don't log as error
+      if (err.response?.status !== 401) {
+        console.error('Failed to fetch user stats:', err);
+      }
       return null;
     }
   }, [isSignedIn]);

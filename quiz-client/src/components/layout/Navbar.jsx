@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useUser, SignedIn, SignedOut, UserButton } from '@clerk/clerk-react';
+import { useUser, SignedIn, SignedOut, useClerk, UserButton } from '@clerk/clerk-react';
 import { useTheme } from '@/context/ThemeContext';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
@@ -23,6 +23,7 @@ import {
 const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
   const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -150,6 +151,16 @@ const Navbar = () => {
                         <Shield className="h-4 w-4 text-primary-600" />
                         Admin Panel
                       </Link>
+                    </div>
+                    {/* Logout */}
+                    <div className="border-t border-gray-100 dark:border-gray-700 py-2">
+                      <button
+                        onClick={() => signOut()}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Log Out
+                      </button>
                     </div>
                   </div>
                 </>

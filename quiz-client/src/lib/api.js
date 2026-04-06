@@ -21,10 +21,14 @@ const api = axios.create({
  */
 api.interceptors.request.use(
   async (config) => {
-    // Clerk handles auth token automatically, but we can add custom headers here
-    const clerkToken = window.Clerk?.session?.getToken();
-    if (clerkToken) {
-      config.headers.Authorization = `Bearer ${clerkToken}`;
+    // Get Clerk token asynchronously
+    try {
+      const clerkToken = await window.Clerk?.session?.getToken();
+      if (clerkToken) {
+        config.headers.Authorization = `Bearer ${clerkToken}`;
+      }
+    } catch (err) {
+      // Token not available yet - that's OK, continue without auth
     }
     return config;
   },

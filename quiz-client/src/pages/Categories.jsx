@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, Button, Badge, Spinner, Input } from '@/components/ui';
-import { Footer } from '@/components/layout';
+import { Sidebar, SidebarProvider, useSidebar } from '@/components/layout';
 import { categoriesApi } from '@/lib/api';
+import { useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
 import {
   Search,
@@ -36,20 +37,22 @@ const iconMap = {
   Brain,
 };
 
-const Categories = () => {
+const CategoriesContent = ({ hasSidebar = false }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [error, setError] = useState(null);
+  const { collapsed } = hasSidebar ? useSidebar() : { collapsed: false };
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
         const data = await categoriesApi.getAll();
-        setCategories(data);
+        setCategories(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message);
+        setCategories([]);
       } finally {
         setLoading(false);
       }
@@ -171,8 +174,6 @@ const Categories = () => {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
@@ -220,6 +221,32 @@ const CategoryCard = ({ category }) => {
         </CardContent>
       </Card>
     </Link>
+  );
+};
+
+const Categories = () => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return (
+      <SidebarProvider>
+        <CategoriesWithSidebar />
+      </SidebarProvider>
+    );
+  }
+
+  return <CategoriesContent />;
+};
+
+const CategoriesWithSidebar = () => {
+  const { collapsed } = useSidebar();
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <CategoriesContent hasSidebar />
+      </div>
+    </div>
   );
 };
 

@@ -4,14 +4,14 @@ import { Loader2 } from 'lucide-react';
 
 const buttonVariants = {
   variant: {
-    default: 'bg-primary text-white hover:bg-primary-600 focus-visible:ring-primary',
-    destructive: 'bg-danger text-white hover:bg-danger-600 focus-visible:ring-danger',
-    outline: 'border-2 border-primary text-primary hover:bg-primary hover:text-white focus-visible:ring-primary',
+    default: 'bg-primary-500 text-white hover:bg-primary-600 focus-visible:ring-primary-500',
+    destructive: 'bg-danger-500 text-white hover:bg-danger-600 focus-visible:ring-danger-500',
+    outline: 'border-2 border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white focus-visible:ring-primary-500',
     secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 focus-visible:ring-gray-500',
     ghost: 'hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-gray-500',
-    link: 'text-primary underline-offset-4 hover:underline focus-visible:ring-primary',
-    success: 'bg-success text-white hover:bg-success-600 focus-visible:ring-success',
-    warning: 'bg-warning text-white hover:bg-warning-600 focus-visible:ring-warning',
+    link: 'text-primary-500 underline-offset-4 hover:underline focus-visible:ring-primary-500',
+    success: 'bg-success-500 text-white hover:bg-success-600 focus-visible:ring-success-500',
+    warning: 'bg-warning-500 text-white hover:bg-warning-600 focus-visible:ring-warning-500',
   },
   size: {
     default: 'h-10 px-4 py-2',

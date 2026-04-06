@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, Button, Badge, Spinner, Select } from '@/components/ui';
-import { Footer } from '@/components/layout';
+import { Sidebar, SidebarProvider, useSidebar } from '@/components/layout';
 import { leaderboardApi } from '@/lib/api';
 import { useAuth } from '@/hooks';
 import { cn, formatNumber } from '@/lib/utils';
@@ -18,7 +18,7 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 
-const Leaderboard = () => {
+const LeaderboardContent = ({ hasSidebar = false }) => {
   const { isSignedIn, user } = useAuth();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,6 +26,7 @@ const Leaderboard = () => {
   const [timeRange, setTimeRange] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+  const { collapsed } = hasSidebar ? useSidebar() : { collapsed: false };
 
   useEffect(() => {
     const fetchLeaderboard = async () => {
@@ -35,9 +36,10 @@ const Leaderboard = () => {
           scope === 'global'
             ? await leaderboardApi.getGlobal({ timeRange, page: currentPage, pageSize })
             : await leaderboardApi.getGlobal({ timeRange, page: currentPage, pageSize });
-        setEntries(data);
+        setEntries(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch leaderboard:', error);
+        setEntries([]);
       } finally {
         setLoading(false);
       }
@@ -311,8 +313,6 @@ const Leaderboard = () => {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
@@ -329,5 +329,31 @@ const Avatar = ({ src, alt, className }) => (
     )}
   </div>
 );
+
+const Leaderboard = () => {
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    return (
+      <SidebarProvider>
+        <LeaderboardWithSidebar />
+      </SidebarProvider>
+    );
+  }
+
+  return <LeaderboardContent />;
+};
+
+const LeaderboardWithSidebar = () => {
+  const { collapsed } = useSidebar();
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+        <LeaderboardContent hasSidebar />
+      </div>
+    </div>
+  );
+};
 
 export default Leaderboard;

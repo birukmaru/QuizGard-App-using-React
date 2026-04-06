@@ -33,13 +33,13 @@ function Home() {
         <div className="text-lg font-medium flex-col sm:flex-row   flex gap-5">
           <button
             onClick={handleStartQuiz}
-            className="bg-primary  px-6 py-2 item-center text-white rounded "
+            className="bg-primary-500  px-6 py-2 item-center text-white rounded "
           >
             Start Quiz
           </button>
 
           <button
-            className="inline-flex item-center px-6 py-2 rounded text-primary ml-3 border hover:bg-primary hover:text-white transition-all duration-300 ease-in
+            className="inline-flex item-center px-6 py-2 rounded text-primary-500 ml-3 border hover:bg-primary-500 hover:text-white transition-all duration-300 ease-in
           "
           >
             <svg
