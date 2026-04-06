@@ -42,6 +42,16 @@ function AppLayout({ children }) {
   );
 }
 
+// Layout for protected app pages (has sidebar, no footer)
+function AppLayoutWithSidebar({ children }) {
+  return (
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
+      <Navbar />
+      <main className="flex-1 pb-20">{children}</main>
+    </div>
+  );
+}
+
 function AuthLayout({ children }) {
   return <div className="min-h-screen">{children}</div>;
 }
@@ -97,11 +107,11 @@ function App() {
           {/* Protected Routes with Layout */}
           <Route
             element={
-              <AppLayout>
+              <AppLayoutWithSidebar>
                 <PrivateRoute>
                   <Outlet />
                 </PrivateRoute>
-              </AppLayout>
+              </AppLayoutWithSidebar>
             }
           >
             <Route path="/dashboard" element={<Dashboard />} />
