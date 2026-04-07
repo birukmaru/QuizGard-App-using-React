@@ -39,23 +39,23 @@ api.interceptors.request.use(
 
 /**
  * Response interceptor for error handling
+ * Only shows toasts for critical errors, not for data-fetching errors
  */
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'An error occurred';
+    const status = error.response?.status;
 
-    if (error.response?.status === 401) {
+    // Only show toast for critical errors (auth, server)
+    if (status === 401) {
       toast.error('Session expired. Please login again.');
-    } else if (error.response?.status === 403) {
+    } else if (status === 403) {
       toast.error('You do not have permission to perform this action.');
-    } else if (error.response?.status === 404) {
-      toast.error('Resource not found.');
-    } else if (error.response?.status >= 500) {
+    } else if (status >= 500) {
       toast.error('Server error. Please try again later.');
-    } else if (!error.response) {
-      toast.error('Network error. Please check your connection.');
     }
+    // Don't show toasts for 404 (resource not found) or network errors
+    // These are expected for data fetching and will be handled gracefully
 
     return Promise.reject(error);
   }
