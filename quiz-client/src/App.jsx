@@ -42,7 +42,17 @@ function AppLayout({ children }) {
   );
 }
 
-// Layout for protected app pages (has sidebar, no footer)
+// Layout for pages with internal sidebar (no AppLayout wrapper, pages handle their own layout)
+function AppLayoutMinimal({ children }) {
+  return (
+    <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
+      <Navbar />
+      <main className="flex-1">{children}</main>
+    </div>
+  );
+}
+
+// Layout for protected pages with internal sidebar
 function AppLayoutWithSidebar({ children }) {
   return (
     <div className="flex min-h-screen flex-col bg-white dark:bg-gray-900">
@@ -64,12 +74,12 @@ function App() {
   return (
     <AuthProvider>
         <Routes>
-          {/* Public Routes with Layout */}
+          {/* Public Routes - minimal layout, pages handle their own sidebar when logged in */}
           <Route
             element={
-              <AppLayout>
+              <AppLayoutMinimal>
                 <Outlet />
-              </AppLayout>
+              </AppLayoutMinimal>
             }
           >
             <Route path="/" element={<Home />} />
