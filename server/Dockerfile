@@ -23,6 +23,9 @@ WORKDIR /app
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 # Copy node_modules from builder (contains generated prisma client)
 COPY --from=builder /app/node_modules ./node_modules
 
