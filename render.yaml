@@ -14,7 +14,7 @@ services:
     type: web
     region: oregon
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma db push && node src/index.js
+    startCommand: npx prisma db push --skip-generate && node src/index.js
     envVars:
       - key: NODE_ENV
         value: production
