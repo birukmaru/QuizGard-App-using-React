@@ -29,7 +29,7 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 # 🔥 FIX EVERYTHING PERMISSION RELATED
 RUN chown -R nodejs:nodejs /app
 
-COPY --chown=nodejs:nodejs . ./src
+COPY --chown=nodejs:nodejs src ./src
 
 ENV NODE_ENV=production
 
