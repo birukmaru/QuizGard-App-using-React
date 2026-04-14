@@ -14,7 +14,7 @@ services:
     type: web
     region: oregon
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma db push --skip-generate && node src/index.js
+    startCommand: node src/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -28,6 +28,8 @@ services:
         sync: false  # Set in Render Dashboard
       - key: ALLOWED_ORIGINS
         value: https://quizguard.onrender.com
+      - key: PRISMA_GENERATE_SKIP_DOWNLOAD
+        value: "true"
     dockerfilePath: server/Dockerfile
     dockerContext: server
 
