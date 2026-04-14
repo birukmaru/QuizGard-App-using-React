@@ -23,6 +23,9 @@ WORKDIR /app
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 
+# Create Prisma cache directory and set permissions
+RUN mkdir -p /home/nodejs/.cache/prisma && chown -R nodejs:nodejs /home/nodejs/.cache
+
 # Install OpenSSL for Prisma
 RUN apk add --no-cache openssl
 
@@ -38,6 +41,9 @@ COPY --from=builder /app/package-lock.json ./package-lock.json
 
 # Change ownership of Prisma engines directory to nodejs user
 RUN chown -R nodejs:nodejs /app/node_modules/@prisma
+
+# Ensure cache directory exists and has correct permissions
+RUN mkdir -p /home/nodejs/.cache/prisma && chown -R nodejs:nodejs /home/nodejs/.cache
 
 # Copy application source
 COPY --chown=nodejs:nodejs . ./src

@@ -28,8 +28,8 @@ services:
         sync: false  # Set in Render Dashboard
       - key: ALLOWED_ORIGINS
         value: https://quizguard.onrender.com
-      - key: PRISMA_GENERATE_SKIP_DOWNLOAD
-        value: "true"
+      - key: PRISMA_CACHE_DIR
+        value: /home/nodejs/.cache/prisma
     dockerfilePath: server/Dockerfile
     dockerContext: server
 
