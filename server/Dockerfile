@@ -33,6 +33,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/package-lock.json ./package-lock.json
 
+# Change ownership of Prisma engines directory to nodejs user
+RUN chown -R nodejs:nodejs /app/node_modules/@prisma
+
 # Copy application source
 COPY --chown=nodejs:nodejs . ./src
 
