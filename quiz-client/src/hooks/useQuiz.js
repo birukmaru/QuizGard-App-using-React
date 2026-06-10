@@ -177,8 +177,14 @@ export function useQuizTaking(quizId) {
           questionId,
           selectedOptionId,
         })),
-        timeSpent: quiz?.timeLimit ? quiz.timeLimit * 60 - timeRemaining : null,
       };
+
+      if (typeof quiz?.timeLimit === 'number' && quiz.timeLimit > 0) {
+        submissionData.timeSpent = Math.max(
+          0,
+          quiz.timeLimit * 60 - (typeof timeRemaining === 'number' ? timeRemaining : 0)
+        );
+      }
 
       const resultData = await attemptsApi.submit(quizId, submissionData);
       setResult(resultData?.data || resultData);

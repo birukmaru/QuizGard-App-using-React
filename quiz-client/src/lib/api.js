@@ -176,7 +176,7 @@ export const questionsApi = {
 
 export const attemptsApi = {
   submit: async (quizId, data) => {
-    const response = await api.post(`/quizzes/${quizId}/attempts`, data);
+    const response = await api.post('/attempts', data);
     toast.success('Quiz submitted successfully!');
     return response.data;
   },
