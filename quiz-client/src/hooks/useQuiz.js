@@ -11,7 +11,7 @@ export function useQuiz(quizId) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch quiz data
+  // Fetch quiz data (includes questions)
   const fetchQuiz = useCallback(async () => {
     if (!quizId) return;
 
@@ -19,7 +19,13 @@ export function useQuiz(quizId) {
       setLoading(true);
       setError(null);
       const quizData = await quizzesApi.getById(quizId);
-      setQuiz(quizData?.data || quizData);
+      const quizContent = quizData?.data || quizData;
+      setQuiz(quizContent);
+      
+      // Extract questions from quiz data
+      if (quizContent?.questions) {
+        setQuestions(quizContent.questions);
+      }
       return quizData;
     } catch (err) {
       setError(err.message);
@@ -29,32 +35,27 @@ export function useQuiz(quizId) {
     }
   }, [quizId]);
 
-  // Fetch quiz questions
+  // Fetch quiz questions (deprecated - now included in quiz data)
   const fetchQuestions = useCallback(async () => {
     if (!quizId) return;
 
     try {
       setLoading(true);
       setError(null);
-      const questionsData = await questionsApi.getByQuiz(quizId);
-      setQuestions(questionsData?.data || questionsData);
-      return questionsData;
+      // Questions are already fetched with the quiz, so just return from state
+      return questions;
     } catch (err) {
       setError(err.message);
       return [];
     } finally {
       setLoading(false);
     }
-  }, [quizId]);
+  }, [quizId, questions]);
 
-  // Fetch both quiz and questions
+  // Fetch both quiz and questions (now just fetches quiz which includes questions)
   const fetchQuizWithQuestions = useCallback(async () => {
-    const [quizData, questionsData] = await Promise.all([
-      fetchQuiz(),
-      fetchQuestions(),
-    ]);
-    return { quiz: quizData, questions: questionsData };
-  }, [fetchQuiz, fetchQuestions]);
+    return await fetchQuiz();
+  }, [fetchQuiz]);
 
   // Fetch quiz on mount if quizId changes
   useEffect(() => {
@@ -81,12 +82,13 @@ export function useQuiz(quizId) {
  * Hook for managing quiz-taking state
  */
 export function useQuizTaking(quizId) {
-  const { questions, loading, error, fetchQuestions } = useQuiz(quizId);
+  const { quiz, questions, loading, error: initialError, fetchQuestions } = useQuiz(quizId);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(initialError);
 
   // Shuffled questions for this session
   const shuffledQuestions = useMemo(() => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, Button, Badge, Spinner, Modal, ModalHeader, ModalBody, ModalFooter } from '@/components/ui';
+import { Card, CardContent, Button, Badge, Spinner, Modal, ModalHeader, ModalTitle, ModalBody, ModalFooter } from '@/components/ui';
 import { useQuizTaking } from '@/hooks';
 import { cn, getGrade } from '@/lib/utils';
 import {
