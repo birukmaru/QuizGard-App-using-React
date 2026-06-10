@@ -32,8 +32,8 @@ const CategoryQuizzes = () => {
         setLoading(true);
         const categoryData = await categoriesApi.getById(categoryId).catch(() => null);
         const quizzesData = await quizzesApi.getByCategory(categoryId, { sort: sortBy }).catch(() => []);
-        setCategory(categoryData);
-        setQuizzes(Array.isArray(quizzesData) ? quizzesData : []);
+        setCategory(categoryData?.data || categoryData);
+        setQuizzes(Array.isArray(quizzesData) ? quizzesData : (quizzesData?.data || []));
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setQuizzes([]);

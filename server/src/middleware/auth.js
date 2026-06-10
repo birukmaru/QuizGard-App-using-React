@@ -44,6 +44,8 @@ export const authenticate = async (req, _res, next) => {
       email: claims.email,
     };
 
+    console.log(`🔑 Token verified: Clerk ID=${claims.sub} | Email=${claims.email}`);
+
     next();
   } catch (err) {
     if (err instanceof UnauthorizedError || err instanceof ForbiddenError) {

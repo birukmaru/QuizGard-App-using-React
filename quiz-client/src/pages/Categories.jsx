@@ -49,7 +49,7 @@ const CategoriesContent = ({ hasSidebar = false }) => {
       try {
         setLoading(true);
         const data = await categoriesApi.getAll();
-        setCategories(Array.isArray(data) ? data : []);
+        setCategories(Array.isArray(data) ? data : (data?.data || []));
       } catch (err) {
         setError(err.message);
         setCategories([]);

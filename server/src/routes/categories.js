@@ -76,6 +76,61 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+// GET /api/categories/:id/quizzes - Get quizzes for a category
+router.get('/:id/quizzes', async (req, res, next) => {
+  try {
+    const { sort = 'recent', page = '1', limit = '20' } = req.query;
+    const categoryId = req.params.id;
+
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+
+    const orderBy = { createdAt: 'desc' };
+
+    const [quizzes, total] = await Promise.all([
+      prisma.quiz.findMany({
+        where: { categoryId, isPublished: true },
+        skip,
+        take: limitNum,
+        orderBy,
+        include: {
+          _count: { select: { questions: true } },
+        },
+      }),
+      prisma.quiz.count({ where: { categoryId, isPublished: true } }),
+    ]);
+
+    res.json({
+      data: quizzes.map((q) => ({
+        id: q.id,
+        title: q.title,
+        description: q.description,
+        difficulty: q.difficulty,
+        timer: q.timer,
+        createdAt: q.createdAt,
+        questionCount: q._count.questions,
+      })),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/categories - Create category (admin only)
 router.post(
   '/',

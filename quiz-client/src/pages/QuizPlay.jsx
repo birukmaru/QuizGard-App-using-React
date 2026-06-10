@@ -326,17 +326,17 @@ const QuizPlay = () => {
         <Card>
           <CardContent className="p-8">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {currentQuestion?.question}
+              {currentQuestion?.text || currentQuestion?.question}
             </h2>
 
             {/* Options */}
             <div className="mt-6 space-y-3">
-              {currentQuestion?.options?.map((option, idx) => {
-                const isSelected = answers[currentQuestion?.id] === idx;
+              {(currentQuestion?.answerOptions || currentQuestion?.options)?.map((option, idx) => {
+                const isSelected = answers[currentQuestion?.id] === option.id;
                 return (
                   <button
                     key={idx}
-                    onClick={() => selectAnswer(idx)}
+                    onClick={() => selectAnswer(option.id)}
                     className={cn(
                       'flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all',
                       isSelected
@@ -354,7 +354,7 @@ const QuizPlay = () => {
                     >
                       {String.fromCharCode(65 + idx)}
                     </span>
-                    <span className="flex-1 text-gray-900 dark:text-white">{option}</span>
+                    <span className="flex-1 text-gray-900 dark:text-white">{option.text || option}</span>
                     {isSelected && <CheckCircle className="h-5 w-5 text-primary-500" />}
                   </button>
                 );

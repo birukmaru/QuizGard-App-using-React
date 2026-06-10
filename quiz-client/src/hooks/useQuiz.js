@@ -19,7 +19,7 @@ export function useQuiz(quizId) {
       setLoading(true);
       setError(null);
       const quizData = await quizzesApi.getById(quizId);
-      setQuiz(quizData);
+      setQuiz(quizData?.data || quizData);
       return quizData;
     } catch (err) {
       setError(err.message);
@@ -37,7 +37,7 @@ export function useQuiz(quizId) {
       setLoading(true);
       setError(null);
       const questionsData = await questionsApi.getByQuiz(quizId);
-      setQuestions(questionsData);
+      setQuestions(questionsData?.data || questionsData);
       return questionsData;
     } catch (err) {
       setError(err.message);
@@ -90,6 +90,7 @@ export function useQuizTaking(quizId) {
 
   // Shuffled questions for this session
   const shuffledQuestions = useMemo(() => {
+    if (!Array.isArray(questions)) return [];
     return shuffleArray(questions);
   }, [questions]);
 
@@ -105,10 +106,10 @@ export function useQuizTaking(quizId) {
   };
 
   // Select answer for current question
-  const selectAnswer = useCallback((answerId) => {
+  const selectAnswer = useCallback((optionId) => {
     setAnswers((prev) => ({
       ...prev,
-      [currentQuestion?.id]: answerId,
+      [currentQuestion?.id]: optionId,
     }));
   }, [currentQuestion]);
 
@@ -169,13 +170,16 @@ export function useQuizTaking(quizId) {
     try {
       setIsSubmitting(true);
       const submissionData = {
-        answers,
-        timeTaken: quiz?.timeLimit ? quiz.timeLimit - timeRemaining : null,
-        completedAt: new Date().toISOString(),
+        quizId,
+        answers: Object.entries(answers).map(([questionId, selectedOptionId]) => ({
+          questionId,
+          selectedOptionId,
+        })),
+        timeSpent: quiz?.timeLimit ? quiz.timeLimit * 60 - timeRemaining : null,
       };
 
       const resultData = await attemptsApi.submit(quizId, submissionData);
-      setResult(resultData);
+      setResult(resultData?.data || resultData);
       return resultData;
     } catch (err) {
       setError(err.message);

@@ -17,7 +17,7 @@ const validate = (req, res, next) => {
 };
 
 // GET /api/quizzes - List quizzes with pagination and filtering
-router.get('/', async (req, res, next) => {
+router.get('/', authenticate, ensureUser, loadUser, async (req, res, next) => {
   try {
     const {
       page = '1',
@@ -33,12 +33,13 @@ router.get('/', async (req, res, next) => {
 
     const where = {};
 
-    // Public endpoint shows only published quizzes unless admin
+    // Show all quizzes for admin, only published for regular users
     if (published !== undefined) {
       where.isPublished = published === 'true';
-    } else {
-      where.isPublished = true; // Default to published only
+    } else if (!req.user || req.user.role !== 'ADMIN') {
+      where.isPublished = true; // Default to published only for non-admins
     }
+    // If admin and no published param specified, show all (no filter applied)
 
     if (categoryId) {
       where.categoryId = categoryId;
@@ -89,6 +90,135 @@ router.get('/', async (req, res, next) => {
     next(err);
   }
 });
+
+// GET /api/quizzes/:quizId/questions - Get questions for a quiz (admin)
+router.get(
+  '/:quizId/questions',
+  authenticate,
+  ensureUser,
+  loadUser,
+  async (req, res, next) => {
+    try {
+      if (!checkAdminRole(req.user.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const questions = await prisma.question.findMany({
+        where: { quizId: req.params.quizId },
+        orderBy: { order: 'asc' },
+        include: {
+          answerOptions: {
+            orderBy: { order: 'asc' },
+          },
+        },
+      });
+
+      res.json({ data: questions });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// POST /api/quizzes/:quizId/questions - Create question for a quiz (admin)
+router.post(
+  '/:quizId/questions',
+  authenticate,
+  ensureUser,
+  loadUser,
+  [
+    body('text').trim().notEmpty().withMessage('Question text is required'),
+    body('order').optional().isInt({ min: 0 }),
+    body('answerOptions')
+      .isArray({ min: 2 })
+      .withMessage('At least 2 answer options required'),
+    body('answerOptions.*.text')
+      .trim()
+      .notEmpty()
+      .withMessage('Answer option text is required'),
+    body('answerOptions.*.isCorrect')
+      .isBoolean()
+      .withMessage('isCorrect must be a boolean'),
+    body('answerOptions.*.order').optional().isInt({ min: 0 }),
+  ],
+  validate,
+  async (req, res, next) => {
+    try {
+      if (!checkAdminRole(req.user.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { text, order, answerOptions } = req.body;
+      const quizId = req.params.quizId;
+
+      const quiz = await prisma.quiz.findUnique({ where: { id: quizId } });
+      if (!quiz) {
+        return res.status(404).json({ error: 'Quiz not found' });
+      }
+
+      let questionOrder = order;
+      if (questionOrder === undefined) {
+        const maxOrder = await prisma.question.aggregate({
+          where: { quizId },
+          _max: { order: true },
+        });
+        questionOrder = (maxOrder._max.order ?? -1) + 1;
+      }
+
+      const question = await prisma.question.create({
+        data: {
+          quizId,
+          text,
+          order: questionOrder,
+          answerOptions: {
+            create: answerOptions.map((opt, idx) => ({
+              text: opt.text,
+              isCorrect: opt.isCorrect ?? false,
+              order: opt.order ?? idx,
+            })),
+          },
+        },
+        include: {
+          answerOptions: { orderBy: { order: 'asc' } },
+        },
+      });
+
+      res.status(201).json({ data: question });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// PUT /api/quizzes/:quizId/questions/reorder - Reorder questions
+router.put(
+  '/:quizId/questions/reorder',
+  authenticate,
+  ensureUser,
+  loadUser,
+  async (req, res, next) => {
+    try {
+      if (!checkAdminRole(req.user.role)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const { orderedIds } = req.body;
+
+      await Promise.all(
+        orderedIds.map((id, index) =>
+          prisma.question.update({
+            where: { id },
+            data: { order: index },
+          })
+        )
+      );
+
+      res.json({ data: { success: true } });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 // GET /api/quizzes/:id - Get quiz with questions (for taking quiz)
 router.get('/:id', async (req, res, next) => {
@@ -194,11 +324,11 @@ router.post(
   [
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('description').optional().trim(),
-    body('categoryId').optional().isUUID(),
+    body('categoryId').optional().isString(),
     body('timer').optional().isInt({ min: 0 }),
     body('difficulty')
       .optional()
-      .isIn(['EASY', 'MEDIUM', 'HARD'])
+      .isIn(['EASY', 'MEDIUM', 'HARD', 'easy', 'medium', 'hard'])
       .withMessage('Invalid difficulty'),
     body('isPublished').optional().isBoolean(),
   ],
@@ -245,9 +375,9 @@ router.put(
   [
     body('title').optional().trim().notEmpty(),
     body('description').optional().trim(),
-    body('categoryId').optional().isUUID(),
+    body('categoryId').optional().isString(),
     body('timer').optional().isInt({ min: 0 }),
-    body('difficulty').optional().isIn(['EASY', 'MEDIUM', 'HARD']),
+    body('difficulty').optional().isIn(['EASY', 'MEDIUM', 'HARD', 'easy', 'medium', 'hard']),
     body('isPublished').optional().isBoolean(),
   ],
   validate,

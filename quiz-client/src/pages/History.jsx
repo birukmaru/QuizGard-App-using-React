@@ -30,7 +30,7 @@ const HistoryContent = ({ hasSidebar = false }) => {
       try {
         setLoading(true);
         const data = await attemptsApi.getHistory({ sort: sortBy });
-        setAttempts(Array.isArray(data) ? data : []);
+        setAttempts(Array.isArray(data) ? data : (data?.data || []));
       } catch (error) {
         console.error('Failed to fetch history:', error);
         setAttempts([]);

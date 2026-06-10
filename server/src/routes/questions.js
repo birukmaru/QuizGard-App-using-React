@@ -23,7 +23,7 @@ router.post(
   ensureUser,
   loadUser,
   [
-    body('quizId').isUUID().withMessage('Valid quiz ID is required'),
+    body('quizId').isString().withMessage('Valid quiz ID is required'),
     body('text').trim().notEmpty().withMessage('Question text is required'),
     body('order').optional().isInt({ min: 0 }),
     body('answerOptions')

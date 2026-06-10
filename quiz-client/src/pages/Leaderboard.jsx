@@ -36,7 +36,7 @@ const LeaderboardContent = ({ hasSidebar = false }) => {
           scope === 'global'
             ? await leaderboardApi.getGlobal({ timeRange, page: currentPage, pageSize })
             : await leaderboardApi.getGlobal({ timeRange, page: currentPage, pageSize });
-        setEntries(Array.isArray(data) ? data : []);
+        setEntries(Array.isArray(data) ? data : (data?.data || []));
       } catch (error) {
         console.error('Failed to fetch leaderboard:', error);
         setEntries([]);

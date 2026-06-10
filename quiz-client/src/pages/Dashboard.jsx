@@ -52,9 +52,11 @@ const DashboardContent = ({ hasSidebar = false }) => {
           quizzesApi.getAll({ limit: 4, sort: 'popular' }).catch(() => []),
         ]);
 
-        setStats(statsData);
-        setRecentAttempts(Array.isArray(attemptsData) ? attemptsData.slice(0, 5) : []);
-        setRecommendedQuizzes(Array.isArray(quizzesData) ? quizzesData.slice(0, 4) : []);
+        setStats(statsData?.data || statsData);
+        const attempts = Array.isArray(attemptsData) ? attemptsData : (attemptsData?.data || []);
+        const quizzes = Array.isArray(quizzesData) ? quizzesData : (quizzesData?.data || []);
+        setRecentAttempts(attempts.slice(0, 5));
+        setRecommendedQuizzes(quizzes.slice(0, 4));
 
         // Generate mock activity data for chart
         setActivityData(

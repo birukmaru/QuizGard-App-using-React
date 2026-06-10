@@ -33,8 +33,10 @@ const HomeContent = ({ hasSidebar = false }) => {
         const quizzesData = await quizzesApi.getFeatured().catch(() => []);
         const categoriesData = await categoriesApi.getAll().catch(() => []);
         // Ensure we always have arrays
-        setFeaturedQuizzes(Array.isArray(quizzesData) ? quizzesData.slice(0, 6) : []);
-        setCategories(Array.isArray(categoriesData) ? categoriesData.slice(0, 8) : []);
+        const quizzes = Array.isArray(quizzesData) ? quizzesData : (quizzesData?.data || []);
+        const cats = Array.isArray(categoriesData) ? categoriesData : (categoriesData?.data || []);
+        setFeaturedQuizzes(quizzes.slice(0, 6));
+        setCategories(cats.slice(0, 8));
       } catch (error) {
         console.error('Failed to fetch data:', error);
         setFeaturedQuizzes([]);

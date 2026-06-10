@@ -46,7 +46,8 @@ const CategoryManager = () => {
     try {
       setLoading(true);
       const data = await categoriesApi.getAll();
-      setCategories(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : (data && data.data) || [];
+      setCategories(list);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       setCategories([]);

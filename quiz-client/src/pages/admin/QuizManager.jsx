@@ -61,8 +61,10 @@ const QuizManager = () => {
         quizzesApi.getAll({ sort: 'recent' }),
         categoriesApi.getAll(),
       ]);
-      setQuizzes(Array.isArray(quizzesData) ? quizzesData : []);
-      setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+      const quizzesList = Array.isArray(quizzesData) ? quizzesData : (Array.isArray(quizzesData?.data) ? quizzesData.data : (quizzesData?.data?.data || quizzesData?.data || []));
+      const categoriesList = Array.isArray(categoriesData) ? categoriesData : (Array.isArray(categoriesData?.data) ? categoriesData.data : categoriesData?.data || []);
+      setQuizzes(quizzesList);
+      setCategories(categoriesList);
     } catch (error) {
       console.error('Failed to fetch data:', error);
       setQuizzes([]);
@@ -105,6 +107,15 @@ const QuizManager = () => {
       console.error('Failed to delete quiz:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleTogglePublish = async (quiz) => {
+    try {
+      await quizzesApi.update(quiz.id, { isPublished: !quiz.isPublished });
+      await fetchData();
+    } catch (error) {
+      console.error('Failed to toggle publish:', error);
     }
   };
 
@@ -241,6 +252,13 @@ const QuizManager = () => {
                       onClick={() => openDeleteConfirm(quiz)}
                     >
                       <Trash2 className="h-4 w-4 text-danger-600" />
+                    </Button>
+                    <Button
+                      variant={quiz.isPublished ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => handleTogglePublish(quiz)}
+                    >
+                      {quiz.isPublished ? 'Unpublish' : 'Publish'}
                     </Button>
                   </div>
                 </CardContent>

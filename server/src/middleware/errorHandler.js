@@ -45,6 +45,9 @@ export const ensureUser = async (req, _res, next) => {
           email: req.auth.email,
         },
       });
+      console.log(`👤 New user created: ${user.email} | Role: ${user.role} | ID: ${user.id}`);
+    } else {
+      console.log(`🔐 User logged in: ${user.email} | Role: ${user.role} | ID: ${user.id}`);
     }
 
     req.user = user;

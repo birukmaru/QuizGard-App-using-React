@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import { PrismaClient } from '@prisma/client';
 
 import categoriesRouter from './routes/categories.js';
 import quizzesRouter from './routes/quizzes.js';
@@ -12,6 +13,30 @@ import usersRouter from './routes/users.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const prisma = new PrismaClient();
+
+async function testDbConnection() {
+  try {
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+    return true;
+  } catch (err) {
+    console.error('❌ Database connection failed:', err.message);
+    return false;
+  }
+}
+
+async function startServer() {
+  const dbOk = await testDbConnection();
+  if (!dbOk) {
+    console.error('Server starting with degraded database state');
+  }
+
+  app.listen(PORT, () => {
+    console.log(`QuizGuard API running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 // CORS configuration
 const corsOptions = {
@@ -60,9 +85,6 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
-app.listen(PORT, () => {
-  console.log(`QuizGuard API running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+startServer();
 
 export default app;

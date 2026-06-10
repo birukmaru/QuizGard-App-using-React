@@ -54,8 +54,8 @@ const QuestionManager = () => {
         quizzesApi.getById(quizId),
         questionsApi.getByQuiz(quizId),
       ]);
-      setQuiz(quizData);
-      setQuestions(questionsData);
+      setQuiz(quizData?.data || quizData);
+      setQuestions(questionsData?.data || questionsData);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -66,7 +66,16 @@ const QuestionManager = () => {
   const handleCreate = async () => {
     try {
       setSaving(true);
-      await questionsApi.create(quizId, formData);
+      const payload = {
+        text: formData.question,
+        answerOptions: formData.options
+          .filter((o) => o.trim())
+          .map((opt, idx) => ({
+            text: opt,
+            isCorrect: idx === formData.correctAnswer,
+          })),
+      };
+      await questionsApi.create(quizId, payload);
       await fetchData();
       setShowCreateModal(false);
       resetForm();
@@ -81,7 +90,16 @@ const QuestionManager = () => {
     if (!selectedQuestion) return;
     try {
       setSaving(true);
-      await questionsApi.update(selectedQuestion.id, formData);
+      const payload = {
+        text: formData.question,
+        answerOptions: formData.options
+          .filter((o) => o.trim())
+          .map((opt, idx) => ({
+            text: opt,
+            isCorrect: idx === formData.correctAnswer,
+          })),
+      };
+      await questionsApi.update(selectedQuestion.id, payload);
       await fetchData();
       setShowEditModal(false);
       setSelectedQuestion(null);
@@ -116,10 +134,15 @@ const QuestionManager = () => {
 
   const openEditModal = (question) => {
     setSelectedQuestion(question);
+    const correctIdx = question.answerOptions
+      ? question.answerOptions.findIndex((o) => o.isCorrect)
+      : 0;
     setFormData({
-      question: question.question,
-      options: question.options || ['', '', '', ''],
-      correctAnswer: question.correctAnswer,
+      question: question.text || question.question || '',
+      options: question.answerOptions
+        ? question.answerOptions.map((o) => o.text)
+        : question.options || ['', '', '', ''],
+      correctAnswer: correctIdx >= 0 ? correctIdx : 0,
       explanation: question.explanation || '',
     });
     setShowEditModal(true);
@@ -194,15 +217,15 @@ const QuestionManager = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {question.question}
+                        {question.text || question.question}
                       </p>
                       <div className="mt-3 space-y-2">
-                        {question.options?.map((option, optIdx) => (
+                        {(question.answerOptions || question.options)?.map((option, optIdx) => (
                           <div
                             key={optIdx}
                             className={cn(
                               'flex items-center gap-2 rounded-lg px-3 py-2 text-sm',
-                              question.correctAnswer === optIdx
+                              option.isCorrect || question.correctAnswer === optIdx
                                 ? 'bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-400'
                                 : 'bg-gray-50 dark:bg-gray-800'
                             )}
@@ -210,8 +233,8 @@ const QuestionManager = () => {
                             <span className="font-medium">
                               {String.fromCharCode(65 + optIdx)}.
                             </span>
-                            <span className="flex-1">{option}</span>
-                            {question.correctAnswer === optIdx && (
+                            <span className="flex-1">{option.text || option}</span>
+                            {(option.isCorrect || question.correctAnswer === optIdx) && (
                               <Badge variant="success" size="sm">Correct</Badge>
                             )}
                           </div>

@@ -23,13 +23,13 @@ router.post(
   ensureUser,
   loadUser,
   [
-    body('quizId').isUUID().withMessage('Valid quiz ID is required'),
+    body('quizId').isString().withMessage('Valid quiz ID is required'),
     body('answers')
       .isArray()
       .withMessage('Answers must be an array'),
-    body('answers.*.questionId').isUUID().withMessage('Valid question ID required'),
+    body('answers.*.questionId').isString().withMessage('Valid question ID required'),
     body('answers.*.selectedOptionId')
-      .isUUID()
+      .isString()
       .withMessage('Valid option ID required'),
     body('timeSpent').optional().isInt({ min: 0 }),
   ],
